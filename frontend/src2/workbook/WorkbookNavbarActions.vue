@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { GitFork, Share2 } from 'lucide-vue-next'
-import { inject, ref } from 'vue'
+import { call } from 'frappe-ui'
+import { Database, GitFork, Share2 } from 'lucide-vue-next'
+import { computed, inject, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { showErrorToast } from '../helpers'
 import session from '../session'
 import { __ } from '../translation'
 import { Workbook, workbookKey } from './workbook'
@@ -8,9 +11,39 @@ import WorkbookLineageDialog from './WorkbookLineageDialog.vue'
 import WorkbookShareDialog from './WorkbookShareDialog.vue'
 
 const workbook = inject(workbookKey) as Workbook
+const route = useRoute()
 
 const showShareDialog = ref(false)
 const showLineageDialog = ref(false)
+const openingSemanticModel = ref(false)
+
+const activeQueryName = computed(() => {
+	if (route.name !== 'WorkbookQuery') return ''
+
+	const query_name = String(route.params.query_name || '')
+	const index = Number(query_name)
+	if (index >= 0 && workbook.doc.queries[index]) {
+		return workbook.doc.queries[index].name
+	}
+	return query_name
+})
+
+async function openSemanticModel() {
+	if (!activeQueryName.value) return
+
+	openingSemanticModel.value = true
+	try {
+		const model = await call(
+			'insights.insights.doctype.insights_semantic_model.insights_semantic_model.get_or_create_for_query',
+			{ query: activeQueryName.value }
+		) as { name: string }
+		window.open(`/app/insights-semantic-model/${model.name}`, '_blank')
+	} catch (error) {
+		showErrorToast(error as Error, false)
+	} finally {
+		openingSemanticModel.value = false
+	}
+}
 </script>
 
 <template>
@@ -55,6 +88,13 @@ const showLineageDialog = ref(false)
 					icon: GitFork,
 					onClick: () => (showLineageDialog = true),
 				},
+				session.user.has_desk_access && activeQueryName
+					? {
+							label: openingSemanticModel ? __('Opening Semantic Model...') : __('Semantic Model'),
+							icon: Database,
+							onClick: () => openSemanticModel(),
+					  }
+					: null,
 				!workbook.doc.read_only
 					? {
 							label: __('Duplicate'),

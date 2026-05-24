@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "autoname": "format:SEM-{####}",
+ "creation": "2026-05-24 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "model_name",
+  "enabled_for_ai",
+  "column_break_1",
+  "workbook",
+  "query",
+  "section_break_1",
+  "description",
+  "fields_tab",
+  "fields",
+  "metrics_tab",
+  "metrics",
+  "policies_tab",
+  "policies"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "model_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Model Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled_for_ai",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled for AI"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workbook",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Workbook",
+   "options": "Insights Workbook"
+  },
+  {
+   "fieldname": "query",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Query",
+   "options": "Insights Query v3",
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "fields_tab",
+   "fieldtype": "Tab Break",
+   "label": "Fields"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "label": "Fields",
+   "options": "Insights Semantic Field"
+  },
+  {
+   "fieldname": "metrics_tab",
+   "fieldtype": "Tab Break",
+   "label": "Metrics"
+  },
+  {
+   "fieldname": "metrics",
+   "fieldtype": "Table",
+   "label": "Metrics",
+   "options": "Insights Semantic Metric"
+  },
+  {
+   "fieldname": "policies_tab",
+   "fieldtype": "Tab Break",
+   "label": "Policies"
+  },
+  {
+   "fieldname": "policies",
+   "fieldtype": "Table",
+   "label": "Policies",
+   "options": "Insights Semantic Policy"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-24 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Insights",
+ "name": "Insights Semantic Model",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Insights Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Insights User",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}
