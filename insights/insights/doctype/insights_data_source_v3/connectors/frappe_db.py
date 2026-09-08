@@ -20,9 +20,8 @@ def get_frappedb_connection(data_source):
 def get_primary_data_source():
     site_db = frappe.get_doc("Insights Data Source v3", "Site DB")
 
-    # Set database type if not already set
-    if not site_db.database_type:
-        site_db.database_type = "PostgreSQL" if frappe.conf.db_type == "postgres" else "MariaDB"
+    # Site DB belongs to this site; a fixture cannot select a different database dialect.
+    site_db.database_type = "PostgreSQL" if frappe.conf.db_type == "postgres" else "MariaDB"
 
     # Use Site DB config if available, otherwise fall back to Frappe config
     if not site_db.host or not site_db.port:
@@ -39,7 +38,7 @@ def get_primary_data_source():
         site_db.database_name = frappe.conf.db_name
 
     if not site_db.username:
-        site_db.username = frappe.conf.db_name
+        site_db.username = frappe.conf.db_user or frappe.conf.db_name
 
     if not site_db.password:
         site_db.password = frappe.conf.db_password

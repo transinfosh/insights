@@ -13,6 +13,7 @@ from insights.insights.query_builders.sql_builder import SQLQueryBuilder
 
 from .base_database import DatabaseCredentialsError, DatabaseParallelConnectionError
 from .mariadb import MARIADB_TO_GENERIC_TYPES, MariaDB
+from .postgresql import PostgresDatabase, PostgresQueryBuilder, PostgresTableFactory
 from .utils import create_insights_table, get_sqlalchemy_engine
 
 
@@ -256,13 +257,7 @@ class FrappeDB(MariaDB):
         return self.execute_query(query, pluck=True)
 
 
-class SiteDB(FrappeDB):
-    def __init__(self, data_source):
-        self.data_source = data_source
-        self.engine = self._get_database_engine()
-        self.query_builder: SQLQueryBuilder = SQLQueryBuilder(self.engine)
-        self.table_factory: FrappeTableFactory = FrappeTableFactory(data_source)
-
+class SiteDatabaseCredentials:
     def _get_database_engine(self):
         """Get database engine, trying replica first if enabled, then falling back to primary"""
         if frappe.conf.read_from_replica:
@@ -298,12 +293,20 @@ class SiteDB(FrappeDB):
     def get_primary_credentials(self):
         """Get primary database credentials"""
         return {
-            "username": frappe.conf.db_name,
+            "username": frappe.conf.db_user or frappe.conf.db_name,
             "password": frappe.conf.db_password,
             "database": frappe.conf.db_name,
             "host": frappe.conf.db_host or "127.0.0.1",
-            "port": frappe.conf.db_port or "3306",
+            "port": frappe.conf.db_port or (5432 if frappe.conf.db_type == "postgres" else 3306),
         }
+
+
+class SiteDB(SiteDatabaseCredentials, FrappeDB):
+    def __init__(self, data_source):
+        self.data_source = data_source
+        self.engine = self._get_database_engine()
+        self.query_builder: SQLQueryBuilder = SQLQueryBuilder(self.engine)
+        self.table_factory: FrappeTableFactory = FrappeTableFactory(data_source)
 
     def create_engine(self, credentials):
         """Create SQLAlchemy engine with given credentials"""
@@ -319,6 +322,26 @@ class SiteDB(FrappeDB):
             ssl_verify_cert=bool(not frappe.conf.developer_mode),
             charset="utf8mb4",
             use_unicode=True,
+        )
+
+
+class PostgresSiteDB(SiteDatabaseCredentials, PostgresDatabase):
+    def __init__(self, data_source):
+        self.data_source = data_source
+        self.engine = self._get_database_engine()
+        self.query_builder = PostgresQueryBuilder(self.engine)
+        self.table_factory = PostgresTableFactory(data_source)
+
+    def create_engine(self, credentials):
+        return get_sqlalchemy_engine(
+            dialect="postgresql",
+            driver="psycopg2",
+            username=credentials["username"],
+            password=credentials["password"],
+            database=credentials["database"],
+            host=credentials["host"],
+            port=credentials["port"],
+            connect_args={"connect_timeout": 1},
         )
 
 

@@ -16,7 +16,7 @@ from insights.insights.doctype.insights_team.insights_team import (
 )
 
 from .sources.base_database import BaseDatabase, DatabaseConnectionError
-from .sources.frappe_db import FrappeDB, SiteDB, is_frappe_db
+from .sources.frappe_db import FrappeDB, PostgresSiteDB, SiteDB, is_frappe_db
 from .sources.mariadb import MariaDB
 from .sources.postgresql import PostgresDatabase
 from .sources.query_store import QueryStore
@@ -194,7 +194,7 @@ class InsightsDataSource(InsightsDataSourceDocument, InsightsDataSourceClient, D
     @cached_property
     def _db(self) -> BaseDatabase:
         if self.is_site_db:
-            return SiteDB(data_source=self.name)
+            return (PostgresSiteDB if frappe.conf.db_type == "postgres" else SiteDB)(data_source=self.name)
         if self.name == "Query Store":
             return QueryStore()
         if self.database_type == "SQLite":
